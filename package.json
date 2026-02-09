@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "dYmanager Web Edition - Fastify + Vite React SPA",
+  "license": "CC-BY-NC-SA-4.0",
   "scripts": {
     "dev:server": "pnpm --filter @dym/server dev",
     "dev:web": "pnpm --filter @dym/web dev",
