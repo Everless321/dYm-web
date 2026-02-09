@@ -8,6 +8,8 @@ import { existsSync } from 'fs'
 import { initDatabase, getSetting } from './database/index.js'
 import { initDouyinHandler } from './services/douyin.js'
 import { initScheduler } from './services/scheduler.js'
+import { initAuth, validateToken } from './services/auth.js'
+import { registerAuthRoutes } from './routes/auth.js'
 import { registerSettingsRoutes } from './routes/settings.js'
 import { registerUserRoutes } from './routes/users.js'
 import { registerTaskRoutes } from './routes/tasks.js'
@@ -24,6 +26,7 @@ const server = Fastify({ logger: true })
 
 async function start(): Promise<void> {
   // Initialize core services first (DB must be ready before getSetting)
+  initAuth()
   initDatabase()
   initDouyinHandler()
   initScheduler()
@@ -39,6 +42,21 @@ async function start(): Promise<void> {
     prefix: '/media/',
     decorateReply: true,
     acceptRanges: true
+  })
+
+  // Auth: public routes first, then middleware
+  registerAuthRoutes(server)
+  server.addHook('onRequest', async (request, reply) => {
+    if (
+      request.url === '/api/auth/login' ||
+      request.url === '/api/auth/check' ||
+      !request.url.startsWith('/api/')
+    ) return
+    const auth = request.headers.authorization
+    const token = auth?.startsWith('Bearer ') ? auth.slice(7) : ''
+    if (!validateToken(token)) {
+      reply.code(401).send({ success: false, error: '未登录' })
+    }
   })
 
   // Register REST routes

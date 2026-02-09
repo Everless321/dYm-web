@@ -2,10 +2,23 @@ import type { ApiResponse } from '@dym/shared'
 
 const BASE = '/api'
 
+let onUnauthorized: (() => void) | null = null
+
+export function setOnUnauthorized(cb: () => void): void {
+  onUnauthorized = cb
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const headers: Record<string, string> = {}
   if (options?.body) headers['Content-Type'] = 'application/json'
+  const token = localStorage.getItem('dym_token')
+  if (token) headers['Authorization'] = `Bearer ${token}`
   const res = await fetch(`${BASE}${path}`, { headers, ...options })
+  if (res.status === 401) {
+    localStorage.removeItem('dym_token')
+    onUnauthorized?.()
+    throw new Error('未登录')
+  }
   const json = (await res.json()) as ApiResponse<T>
   if (!json.success) throw new Error(json.error || 'Request failed')
   return json.data as T
