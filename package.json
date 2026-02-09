@@ -1,0 +1,15 @@
+{
+  "name": "dym-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "dYmanager Web Edition - Fastify + Vite React SPA",
+  "scripts": {
+    "dev:server": "pnpm --filter @dym/server dev",
+    "dev:web": "pnpm --filter @dym/web dev",
+    "build": "pnpm --filter @dym/web build && pnpm --filter @dym/server build",
+    "start": "node packages/server/dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
