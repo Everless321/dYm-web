@@ -89,6 +89,10 @@ export default function UsersPage() {
   const [batchLoading, setBatchLoading] = useState(false)
   const [batchCronValid, setBatchCronValid] = useState(true)
 
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
+  const [deleteFiles, setDeleteFiles] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+
   const [syncingUserId, setSyncingUserId] = useState<number | null>(null)
   const [syncProgress, setSyncProgress] = useState<SyncProgress | null>(null)
 
@@ -207,13 +211,19 @@ export default function UsersPage() {
     }
   }
 
-  const handleDelete = async (id: number) => {
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm) return
+    setDeleteLoading(true)
     try {
-      await usersApi.delete(id)
-      toast.success('用户已删除')
+      await usersApi.delete(deleteConfirm, deleteFiles)
+      toast.success(deleteFiles ? '用户及文件已删除' : '用户已删除')
+      setDeleteConfirm(null)
+      setDeleteFiles(false)
       loadUsers()
     } catch {
       toast.error('删除失败')
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -704,7 +714,7 @@ export default function UsersPage() {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 text-[#6E6E73] hover:text-[#0A84FF]"
-                      onClick={() => handleDelete(user.id)}
+                      onClick={() => { setDeleteConfirm(user.id); setDeleteFiles(false) }}
                       title="删除用户"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -896,6 +906,39 @@ export default function UsersPage() {
             <Button onClick={handleSaveEdit} disabled={editLoading}>
               {editLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
               保存
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirm Dialog */}
+      <Dialog open={!!deleteConfirm} onOpenChange={(open) => { if (!open) { setDeleteConfirm(null); setDeleteFiles(false) } }}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>确认删除</DialogTitle>
+            <DialogDescription>
+              确定要删除用户 {users.find((u) => u.id === deleteConfirm)?.nickname} 吗？此操作不可恢复。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <Checkbox
+                checked={deleteFiles}
+                onCheckedChange={(checked) => setDeleteFiles(!!checked)}
+              />
+              <div>
+                <p className="text-sm text-[#1D1D1F]">同时删除已下载文件</p>
+                <p className="text-xs text-[#A1A1A6]">删除该用户在磁盘上的所有下载文件</p>
+              </div>
+            </label>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setDeleteConfirm(null); setDeleteFiles(false) }} disabled={deleteLoading}>
+              取消
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm} disabled={deleteLoading}>
+              {deleteLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              确认删除
             </Button>
           </DialogFooter>
         </DialogContent>

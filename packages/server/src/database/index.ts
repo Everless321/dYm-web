@@ -352,9 +352,14 @@ export function updateUser(id: number, input: Partial<CreateUserInput>): DbUser 
   return getUserById(id)
 }
 
-export function deleteUser(id: number): void {
+export function deleteUser(id: number): { sec_uid: string } | undefined {
   const database = getDatabase()
+  const user = getUserById(id)
+  if (!user) return undefined
+  database.prepare('DELETE FROM posts WHERE user_id = ?').run(id)
+  database.prepare('DELETE FROM task_users WHERE user_id = ?').run(id)
   database.prepare('DELETE FROM users WHERE id = ?').run(id)
+  return { sec_uid: user.sec_uid }
 }
 
 export function setUserShowInHome(id: number, show: boolean): void {
@@ -678,9 +683,30 @@ export function getPostByAwemeId(awemeId: string): DbPost | undefined {
   return database.prepare('SELECT * FROM posts WHERE aweme_id = ?').get(awemeId) as DbPost | undefined
 }
 
-export function getPostsByUserId(userId: number): DbPost[] {
+export function getPostsByUserId(userId: number, page = 1, pageSize = 50): { posts: DbPost[]; total: number } {
   const database = getDatabase()
-  return database.prepare('SELECT * FROM posts WHERE user_id = ? ORDER BY downloaded_at DESC').all(userId) as DbPost[]
+  const offset = (page - 1) * pageSize
+  const posts = database
+    .prepare('SELECT * FROM posts WHERE user_id = ? ORDER BY downloaded_at DESC LIMIT ? OFFSET ?')
+    .all(userId, pageSize, offset) as DbPost[]
+  const row = database
+    .prepare('SELECT COUNT(*) as count FROM posts WHERE user_id = ?')
+    .get(userId) as { count: number }
+  return { posts, total: row.count }
+}
+
+export function deletePost(id: number): DbPost | undefined {
+  const database = getDatabase()
+  const post = getPostById(id)
+  if (!post) return undefined
+  database.prepare('DELETE FROM posts WHERE id = ?').run(id)
+  return post
+}
+
+export function deletePostsByUserId(userId: number): number {
+  const database = getDatabase()
+  const result = database.prepare('DELETE FROM posts WHERE user_id = ?').run(userId)
+  return result.changes
 }
 
 export function getPostCountByUserId(userId: number): number {

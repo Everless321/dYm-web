@@ -7,8 +7,11 @@ import {
   getUserBySecUid,
   updateUser,
   updateUserSettings,
-  batchUpdateUserSettings
+  batchUpdateUserSettings,
+  getSetting
 } from '../database/index.js'
+import { join } from 'path'
+import { existsSync, rmSync } from 'fs'
 import {
   parseDouyinUrl,
   fetchUserProfile,
@@ -120,14 +123,25 @@ export function registerUserRoutes(server: FastifyInstance): void {
     }
   })
 
-  server.delete<{ Params: { id: string } }>('/api/users/:id', async (request) => {
-    try {
-      deleteUser(parseInt(request.params.id))
-      return { success: true, data: null }
-    } catch (error) {
-      return { success: false, error: (error as Error).message }
+  server.delete<{ Params: { id: string }; Querystring: { deleteFiles?: string } }>(
+    '/api/users/:id',
+    async (request) => {
+      try {
+        const deleteFiles = request.query.deleteFiles === 'true'
+        const result = deleteUser(parseInt(request.params.id))
+        if (deleteFiles && result) {
+          const downloadPath = getSetting('download_path') || join(process.env.DYM_DATA_DIR!, 'Download', 'post')
+          const userDir = join(downloadPath, result.sec_uid)
+          if (existsSync(userDir)) {
+            rmSync(userDir, { recursive: true, force: true })
+          }
+        }
+        return { success: true, data: null }
+      } catch (error) {
+        return { success: false, error: (error as Error).message }
+      }
     }
-  })
+  )
 
   server.post<{ Params: { id: string } }>('/api/users/:id/refresh', async (request) => {
     try {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { ChevronDown, Loader2, CheckCircle } from 'lucide-react'
+import { Loader2, CheckCircle } from 'lucide-react'
 import { settingsApi, grokApi } from '@/api/client'
 
 export default function SystemPage() {
@@ -19,10 +19,6 @@ export default function SystemPage() {
   const [analysisSlices, setAnalysisSlices] = useState('4')
   const [analysisPrompt, setAnalysisPrompt] = useState('')
 
-  const [showConcurrencyDropdown, setShowConcurrencyDropdown] = useState(false)
-  const [showModelDropdown, setShowModelDropdown] = useState(false)
-  const [showAnalysisConcurrencyDropdown, setShowAnalysisConcurrencyDropdown] = useState(false)
-  const [showSlicesDropdown, setShowSlicesDropdown] = useState(false)
 
   useEffect(() => {
     loadSettings()
@@ -108,9 +104,6 @@ export default function SystemPage() {
     }
   }
 
-  const concurrencyOptions = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
-  const modelOptions = ['grok-4-fast', 'grok-4', 'grok-3-vision', 'gpt-4-vision']
-  const slicesOptions = ['1', '2', '3', '4', '5', '6', '8', '10']
 
   return (
     <div className="flex flex-col h-full">
@@ -262,35 +255,13 @@ export default function SystemPage() {
                       <p className="text-sm text-[#1D1D1F]">并发下载数</p>
                       <p className="text-xs text-[#A1A1A6] mt-1">同时下载的视频数量</p>
                     </div>
-                    <div className="relative">
-                      <button
-                        onClick={() => setShowConcurrencyDropdown(!showConcurrencyDropdown)}
-                        className="w-full md:w-[160px] h-10 px-3 rounded-lg bg-[#F5F5F7] border border-[#E5E5E7] flex items-center justify-between"
-                      >
-                        <span className="text-sm text-[#1D1D1F]">{videoDownloadConcurrency}</span>
-                        <ChevronDown className="h-4 w-4 text-[#A1A1A6] ml-2" />
-                      </button>
-                      {showConcurrencyDropdown && (
-                        <div className="absolute top-full right-0 mt-1 bg-white rounded-lg border border-[#E5E5E7] shadow-md z-10 max-h-48 overflow-y-auto min-w-[120px]">
-                          {concurrencyOptions.map((opt) => (
-                            <button
-                              key={opt}
-                              onClick={() => {
-                                setVideoDownloadConcurrency(opt)
-                                setShowConcurrencyDropdown(false)
-                              }}
-                              className={`w-full px-3 py-2 text-left text-sm hover:bg-[#F2F2F4] transition-colors ${
-                                opt === videoDownloadConcurrency
-                                  ? 'text-[#0A84FF] font-medium'
-                                  : 'text-[#1D1D1F]'
-                              }`}
-                            >
-                              {opt}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    <input
+                      type="number"
+                      value={videoDownloadConcurrency}
+                      onChange={(e) => setVideoDownloadConcurrency(e.target.value)}
+                      min="1"
+                      className="w-full md:w-[140px] h-10 px-3 rounded-lg bg-[#F5F5F7] border border-[#E5E5E7] text-sm text-[#1D1D1F] transition-colors focus:outline-none focus-visible:border-[#0A84FF] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/20 text-center"
+                    />
                   </div>
                 </div>
 
@@ -316,35 +287,13 @@ export default function SystemPage() {
                       <p className="text-sm text-[#1D1D1F]">AI 模型</p>
                       <p className="text-xs text-[#A1A1A6] mt-1">用于视频分析的模型</p>
                     </div>
-                    <div className="relative">
-                      <button
-                        onClick={() => setShowModelDropdown(!showModelDropdown)}
-                        className="w-full md:w-[220px] h-10 px-3 rounded-lg bg-[#F5F5F7] border border-[#E5E5E7] flex items-center justify-between"
-                      >
-                        <span className="text-sm text-[#1D1D1F]">{analysisModel}</span>
-                        <ChevronDown className="h-4 w-4 text-[#A1A1A6] ml-2" />
-                      </button>
-                      {showModelDropdown && (
-                        <div className="absolute top-full right-0 mt-1 bg-white rounded-lg border border-[#E5E5E7] shadow-md z-10 min-w-[200px]">
-                          {modelOptions.map((model) => (
-                            <button
-                              key={model}
-                              onClick={() => {
-                                setAnalysisModel(model)
-                                setShowModelDropdown(false)
-                              }}
-                              className={`w-full px-3 py-2 text-left text-sm hover:bg-[#F2F2F4] transition-colors ${
-                                model === analysisModel
-                                  ? 'text-[#0A84FF] font-medium'
-                                  : 'text-[#1D1D1F]'
-                              }`}
-                            >
-                              {model}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    <input
+                      type="text"
+                      value={analysisModel}
+                      onChange={(e) => setAnalysisModel(e.target.value)}
+                      placeholder="grok-4-fast"
+                      className="w-full md:w-[220px] h-10 px-3 rounded-lg bg-[#F5F5F7] border border-[#E5E5E7] text-sm text-[#1D1D1F] transition-colors focus:outline-none focus-visible:border-[#0A84FF] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/20"
+                    />
                   </div>
 
                   {/* Analysis Concurrency */}
@@ -353,37 +302,13 @@ export default function SystemPage() {
                       <p className="text-sm text-[#1D1D1F]">分析并发数</p>
                       <p className="text-xs text-[#A1A1A6] mt-1">同时分析的视频数量</p>
                     </div>
-                    <div className="relative">
-                      <button
-                        onClick={() =>
-                          setShowAnalysisConcurrencyDropdown(!showAnalysisConcurrencyDropdown)
-                        }
-                        className="w-full md:w-[160px] h-10 px-3 rounded-lg bg-[#F5F5F7] border border-[#E5E5E7] flex items-center justify-between"
-                      >
-                        <span className="text-sm text-[#1D1D1F]">{analysisConcurrency}</span>
-                        <ChevronDown className="h-4 w-4 text-[#A1A1A6] ml-2" />
-                      </button>
-                      {showAnalysisConcurrencyDropdown && (
-                        <div className="absolute top-full right-0 mt-1 bg-white rounded-lg border border-[#E5E5E7] shadow-md z-10 max-h-48 overflow-y-auto min-w-[120px]">
-                          {concurrencyOptions.map((opt) => (
-                            <button
-                              key={opt}
-                              onClick={() => {
-                                setAnalysisConcurrency(opt)
-                                setShowAnalysisConcurrencyDropdown(false)
-                              }}
-                              className={`w-full px-3 py-2 text-left text-sm hover:bg-[#F2F2F4] transition-colors ${
-                                opt === analysisConcurrency
-                                  ? 'text-[#0A84FF] font-medium'
-                                  : 'text-[#1D1D1F]'
-                              }`}
-                            >
-                              {opt}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    <input
+                      type="number"
+                      value={analysisConcurrency}
+                      onChange={(e) => setAnalysisConcurrency(e.target.value)}
+                      min="1"
+                      className="w-full md:w-[140px] h-10 px-3 rounded-lg bg-[#F5F5F7] border border-[#E5E5E7] text-sm text-[#1D1D1F] transition-colors focus:outline-none focus-visible:border-[#0A84FF] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/20 text-center"
+                    />
                   </div>
 
                   {/* Analysis RPM */}
@@ -406,35 +331,13 @@ export default function SystemPage() {
                       <p className="text-sm text-[#1D1D1F]">视频切片数</p>
                       <p className="text-xs text-[#A1A1A6] mt-1">每个视频分析的帧数</p>
                     </div>
-                    <div className="relative">
-                      <button
-                        onClick={() => setShowSlicesDropdown(!showSlicesDropdown)}
-                        className="w-full md:w-[160px] h-10 px-3 rounded-lg bg-[#F5F5F7] border border-[#E5E5E7] flex items-center justify-between"
-                      >
-                        <span className="text-sm text-[#1D1D1F]">{analysisSlices}</span>
-                        <ChevronDown className="h-4 w-4 text-[#A1A1A6] ml-2" />
-                      </button>
-                      {showSlicesDropdown && (
-                        <div className="absolute top-full right-0 mt-1 bg-white rounded-lg border border-[#E5E5E7] shadow-md z-10 min-w-[120px]">
-                          {slicesOptions.map((opt) => (
-                            <button
-                              key={opt}
-                              onClick={() => {
-                                setAnalysisSlices(opt)
-                                setShowSlicesDropdown(false)
-                              }}
-                              className={`w-full px-3 py-2 text-left text-sm hover:bg-[#F2F2F4] transition-colors ${
-                                opt === analysisSlices
-                                  ? 'text-[#0A84FF] font-medium'
-                                  : 'text-[#1D1D1F]'
-                              }`}
-                            >
-                              {opt}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    <input
+                      type="number"
+                      value={analysisSlices}
+                      onChange={(e) => setAnalysisSlices(e.target.value)}
+                      min="1"
+                      className="w-full md:w-[140px] h-10 px-3 rounded-lg bg-[#F5F5F7] border border-[#E5E5E7] text-sm text-[#1D1D1F] transition-colors focus:outline-none focus-visible:border-[#0A84FF] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/20 text-center"
+                    />
                   </div>
 
                   {/* Analysis Prompt */}

@@ -18,6 +18,7 @@ import { registerDownloadRoutes } from './routes/download.js'
 import { registerSyncRoutes } from './routes/sync.js'
 import { registerAnalysisRoutes } from './routes/analysis.js'
 import { registerSystemRoutes } from './routes/system.js'
+import { registerFilesRoutes } from './routes/files.js'
 import { registerWsHandler } from './ws/index.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -68,6 +69,7 @@ async function start(): Promise<void> {
   registerSyncRoutes(server)
   registerAnalysisRoutes(server)
   registerSystemRoutes(server)
+  registerFilesRoutes(server)
 
   // Register WebSocket
   registerWsHandler(server)

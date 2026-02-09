@@ -50,7 +50,8 @@ import type {
 export const usersApi = {
   getAll: () => api.get<DbUser[]>('/users'),
   add: (url: string) => api.post<DbUser>('/users', { url }),
-  delete: (id: number) => api.delete<void>(`/users/${id}`),
+  delete: (id: number, deleteFiles?: boolean) =>
+    api.delete<void>(`/users/${id}${deleteFiles ? '?deleteFiles=true' : ''}`),
   refresh: (id: number) => api.post<DbUser>(`/users/${id}/refresh`),
   batchRefresh: (users: { id: number; homepage_url: string; nickname: string }[]) =>
     api.post<BatchRefreshResult>('/users/batch-refresh', { users }),
@@ -138,6 +139,21 @@ import type { VideoInfo } from '@dym/shared'
 export const videoApi = {
   getDetail: (url: string) => api.post<VideoInfo>('/video/detail', { url }),
   downloadToFolder: (info: VideoInfo) => api.post<void>('/video/download', info)
+}
+
+// ============ Files ============
+export const filesApi = {
+  getUserPosts: (userId: number, page?: number, pageSize?: number) => {
+    const params = new URLSearchParams()
+    if (page) params.set('page', String(page))
+    if (pageSize) params.set('pageSize', String(pageSize))
+    return api.get<{ posts: DbPost[]; total: number }>(`/files/users/${userId}/posts?${params}`)
+  },
+  getFileSizes: (secUid: string) =>
+    api.get<{ totalSize: number; folderCount: number }>(`/files/${secUid}/sizes`),
+  deletePost: (postId: number) => api.delete<boolean>(`/files/posts/${postId}`),
+  deleteUserFiles: (userId: number, secUid: string) =>
+    api.delete<number>(`/files/users/${userId}/${secUid}`)
 }
 
 // ============ Scheduler ============
