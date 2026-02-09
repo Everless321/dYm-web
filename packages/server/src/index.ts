@@ -55,8 +55,11 @@ async function start(): Promise<void> {
   registerWsHandler(server)
 
   // Serve frontend build in production
-  const frontendPath = join(__dirname, '../../web/dist')
-  if (existsSync(frontendPath)) {
+  const frontendPath = [
+    join(__dirname, '../../web/dist'),
+    join(__dirname, '../../../../web/dist')
+  ].find(p => existsSync(p)) ?? ''
+  if (frontendPath) {
     await server.register(fastifyStatic, {
       root: frontendPath,
       prefix: '/',

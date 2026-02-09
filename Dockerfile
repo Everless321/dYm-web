@@ -55,4 +55,4 @@ ENV DYM_DATA_DIR=/data
 EXPOSE 4000
 VOLUME ["/data"]
 
-CMD ["node", "packages/server/dist/index.js"]
+CMD ["node", "packages/server/dist/server/src/index.js"]

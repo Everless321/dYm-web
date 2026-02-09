@@ -203,6 +203,7 @@ export function registerUserRoutes(server: FastifyInstance): void {
         const id = parseInt(request.params.id)
         const input = request.body as UpdateUserSettingsInput
         const updated = updateUserSettings(id, input)
+        if (!updated) throw new Error('用户不存在')
         if (updated.auto_sync && updated.sync_cron) {
           scheduleUser(updated)
         } else {
