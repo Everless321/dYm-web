@@ -206,4 +206,4 @@ packages/
 
 ## License
 
-本项目采用 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 协议，**禁止商用**。
+本项目采用 [GPL v3](https://www.gnu.org/licenses/gpl-3.0.html) 协议。自由使用，再分发须开源且沿用同协议。
